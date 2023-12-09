@@ -1,12 +1,14 @@
 package com.bookingProject.tour.exp.controller;
 
 import com.bookingProject.tour.exp.config.OpenApiConfig;
+import com.bookingProject.tour.exp.entity.Characteristic;
 import com.bookingProject.tour.exp.entity.Product;
 import com.bookingProject.tour.exp.entity.dto.product.SaveProduct;
 import com.bookingProject.tour.exp.service.IProductService;
 import com.bookingProject.tour.exp.entity.dto.product.ProductDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -67,9 +69,9 @@ public class ProductController {
         return productsService.guardarProd(saveProduct);
     }
 
-    @Operation(summary = "", description = "", responses = {
-            @ApiResponse(responseCode = "200", description = "",
-                    content = @Content(schema = @Schema()))
+    @Operation(summary = "Utilice este endpoint para traer todos los productos.", description = "Los campos obtenidos son ID, title, description, thumbnail, images, category, characteristics y politics de los productos de nuestra base de datos.", responses = {
+            @ApiResponse(responseCode ="200", description = "Peticion correcta",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Product.class))))
     })
     @GetMapping("/public/traerTodo")
     @ResponseStatus(HttpStatus.OK)
@@ -77,9 +79,13 @@ public class ProductController {
         return productsService.traerTodo();
     }
 
-    @Operation(summary = "", description = "", responses = {
-            @ApiResponse(responseCode = "200", description = "",
-                    content = @Content(schema = @Schema()))
+    @Operation(summary = "Utilice este endpoint para traer un producto.", description = "Los campos obtenidos son ID, title, description, thumbnail, images, category, characteristics y politics del producto de nuestra base de datos.", responses = {
+            @ApiResponse(responseCode ="200", description = "Peticion correcta",
+                    content = @Content(schema = @Schema(implementation = Product.class))),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado.",
+                    content = @Content(schema = @Schema(implementation = String.class), examples = {
+                            @ExampleObject(name = "Producto no encontrado", description = "No se encontro el producto por ID en nuestra base de datos.", value = "No se encontró el id en la base de datos")
+                    }))
     })
     @GetMapping("/public/detalle/{id}")
     public ResponseEntity<?> detalleProd(@PathVariable Long id){
@@ -95,10 +101,25 @@ public class ProductController {
         return productsService.buscarPorCategory(id);
     }
 
-    @Operation(summary = "", description = "", responses = {
-            @ApiResponse(responseCode = "200", description = "",
-                    content = @Content(schema = @Schema()))
+    @Operation(summary = "Utilice este endpoint para modificar todos los campos de producto", description = """
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las características de muestra, en este caso los IDs menores a 6.
+            
+            Es necesario que todos los campos contengan datos válidos. Para modificar características deberá crear nuevas características que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
+            @ApiResponse(responseCode = "200", description = "Peticion correcta.",
+                    content = @Content(schema = @Schema(implementation = Characteristic.class))),
+            @ApiResponse(responseCode = "400", description = "No se pudo completar la modificación de característica de producto.",
+                    content = @Content(schema = @Schema(implementation = String.class), examples = {
+                            @ExampleObject(name = "ID inválido", description = "Solo se permiten ID mayores a 6", value = "Introduzca un numero mayor a 6."),
+                            @ExampleObject(name = "Características existente", description = "No se permiten crear dos características con el mismo nombre.", value = "El nombre de la característica ya esta en uso. Por favor elige un nombre de característica diferente."),
+                            @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
+                            @ExampleObject(name = "Imagen inválida", description = "Las extensiones de archivos validos que aceptamos son: jpg, png, gif, jpeg y svg.", value = "Solo aceptamos archivos con extensiones jpg, png, gif, jpeg y svg"),
+                            @ExampleObject(name = "Imagen requerida", description = "Es requerimiento adjuntar una imagen representativa.", value = "Se necesita una imagen representativa para la característica.")})),
+            @ApiResponse(responseCode = "404", description = "Característica no encontrada.",
+                    content = @Content(schema = @Schema(implementation = String.class), examples = {
+                            @ExampleObject(name = "Característica no encontrada", description = "No se encontro la característica por ID en nuestra base de datos.", value = "No se encontró la característica en nuestra base de datos.")
+                    }))
     })
+    @OpenApiConfig.WrongResponsesJWT
     @SecurityRequirement(name = "BearerToken",scopes = {"ADMIN"})
     @PutMapping(value = "/admin/modificar", consumes = "multipart/form-data")
     @PreAuthorize("hasRole('ADMIN')")

@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +84,7 @@ public class ProductService implements IProductService {
             Product product= resultado.get();
             return new ResponseEntity<>(product,HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("No se encontró el producto. Por favor intenta con otros parametros de busqueda.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("No se encontró el id en la base de datos", HttpStatus.NOT_FOUND);
         }
     }
 
