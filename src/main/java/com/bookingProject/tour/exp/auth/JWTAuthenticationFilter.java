@@ -54,4 +54,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             resolver.resolveException(request,response,null,ex);
         }
     }
+
+    public static void main(String[] args) {
+        System.out.println(System.getenv("JIO"));
+    }
 }

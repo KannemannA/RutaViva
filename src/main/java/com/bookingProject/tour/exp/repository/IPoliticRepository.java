@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface IPoliticRepository extends JpaRepository<Politic,Long> {
-
     Optional<Politic> findByTitle(String title);
 }

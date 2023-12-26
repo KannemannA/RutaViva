@@ -5,7 +5,6 @@ import com.bookingProject.tour.exp.entity.dto.politic.SavePolitic;
 import com.bookingProject.tour.exp.repository.IPoliticRepository;
 import com.bookingProject.tour.exp.service.IPoliticService;
 import com.bookingProject.tour.exp.entity.dto.politic.PoliticDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,6 @@ public class PoliticService implements IPoliticService {
 
     @Autowired
     private IPoliticRepository politicRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Override
     public ResponseEntity<?> crearPolitica(SavePolitic savePolitic) {
@@ -50,7 +46,7 @@ public class PoliticService implements IPoliticService {
             politic.setTitle(politicDTO.getTitle());
             politic.setDescription(politicDTO.getDescription());
             politicRepository.save(politic);
-            return new ResponseEntity<>(politic, HttpStatus.CREATED);
+            return new ResponseEntity<>(politic, HttpStatus.OK);
         }
         return new ResponseEntity<>("No se encontró la politica en la base de datos.", HttpStatus.NOT_FOUND);
     }
@@ -66,7 +62,7 @@ public class PoliticService implements IPoliticService {
             }
             if(politicDTO.getDescription()!=null) politic.setDescription(politicDTO.getDescription());
             politicRepository.save(politic);
-            return new ResponseEntity<>(politic, HttpStatus.CREATED);
+            return new ResponseEntity<>(politic, HttpStatus.OK);
         }else return new ResponseEntity<>("No se encontró la politica en la base de datos.", HttpStatus.NOT_FOUND);
     }
 
