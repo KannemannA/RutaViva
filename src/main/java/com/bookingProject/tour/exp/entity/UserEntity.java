@@ -12,12 +12,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Entity(name = "user")
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-@Table(name = "user")
 public class UserEntity implements UserDetails {
     @Id
     @SequenceGenerator(name = "user_secuence",sequenceName = "user_secuence", allocationSize = 1)
