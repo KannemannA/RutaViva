@@ -10,14 +10,19 @@ import com.bookingProject.tour.exp.service.IEmailService;
 import com.bookingProject.tour.exp.service.IUserEntityService;
 import com.bookingProject.tour.exp.template.EmailTemplate;
 import com.bookingProject.tour.exp.entity.dto.userEntity.LoginUser;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +41,7 @@ public class UserEntityService implements IUserEntityService {
     private JwtUtils jwt;
 
     @Override
-    public ResponseEntity<?> registrarUsuario(SaveUser saveUser) {
+    public ResponseEntity<?> registrarUsuario(SaveUser saveUser) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, JOSEException {
         UserEntity userEntity= UserEntity.builder()
             .name(saveUser.getName())
             .lastName(saveUser.getLastName())
@@ -44,16 +49,16 @@ public class UserEntityService implements IUserEntityService {
             .password(passwordEncoder.encode(saveUser.getPassword()))
             .role(ERole.USER).build();
         userEntity= userEntityRepository.save(userEntity);
-        String token= jwt.generarTokenkey(new HashMap<>(),userEntity);
+        String token= jwt.generarTokenkey(userEntity);
         emailService.sendEmail(userEntity.getEmail(),"Registro de usuario - Ruta Viva", new EmailTemplate().singUpTemplate(userEntity.getName(),userEntity.getEmail()));
         return new ResponseEntity<>(token,HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<?> login(LoginUser login){
+    public ResponseEntity<?> login(LoginUser login) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, JOSEException {
+        UserEntity user= userEntityRepository.findByEmail(login.getEmail()).orElseThrow(()->new BadCredentialsException(""));
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login.getEmail(),login.getPassword()));
-        UserEntity user= userEntityRepository.findByEmail(login.getEmail()).orElseThrow();
-        String token= jwt.generarTokenkey(new HashMap<>(), user);
+        String token= jwt.generarTokenkey(user);
         return new ResponseEntity<>(token,HttpStatus.OK);
     }
 

@@ -12,13 +12,14 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     @Autowired
     private JWTAuthenticationFilter jwtAuthenticationFilter;
@@ -32,7 +33,7 @@ public class SecurityConfig {
                 .and()
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->{
-                    auth.requestMatchers("/api/product/public/**", "/api/category/public/**","/api/character/public/**","/api/user/public/**","/api/booking/public/**","/api/politic/public/**").permitAll();
+                    auth.requestMatchers(new RegexRequestMatcher(".*/public/.*", null)).permitAll();
                     auth.requestMatchers(AUTH_WHITELIST).permitAll();
                     auth.anyRequest().authenticated();
                 })

@@ -1,7 +1,6 @@
 package com.bookingProject.tour.exp.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +31,8 @@ public class GlobalExceptionHandler {
         if (ex instanceof AccessDeniedException){
             return new ResponseEntity<>("No tienes suficientes privilegios para acceder a este recurso",HttpStatus.FORBIDDEN);
         }
-        if(ex instanceof SignatureException){
-            return new ResponseEntity<>("El token parece estar adulterado",HttpStatus.FORBIDDEN);
-        }
-        if (ex instanceof ExpiredJwtException){
-            return new ResponseEntity<>("El token expiro",HttpStatus.FORBIDDEN);
+        if(ex instanceof JOSEException){
+            return new ResponseEntity<>(ex.getMessage(),HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
     }

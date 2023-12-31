@@ -6,6 +6,7 @@ import com.bookingProject.tour.exp.entity.dto.userEntity.SaveUser;
 import com.bookingProject.tour.exp.entity.dto.userEntity.UserEntityDTO;
 import com.bookingProject.tour.exp.service.IUserEntityService;
 import com.bookingProject.tour.exp.entity.dto.userEntity.LoginUser;
+import com.nimbusds.jose.JOSEException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 @RestController
@@ -47,7 +51,7 @@ public class UserEntityController {
     })
     @PostMapping("/public/guardar")
     @Transactional
-    public ResponseEntity<?> createUser(@RequestBody SaveUser user){
+    public ResponseEntity<?> createUser(@RequestBody SaveUser user) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, JOSEException {
         if (!user.getEmail().matches("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) return new ResponseEntity<>("Introduzca un correo con formato valido. ej example@example.com", HttpStatus.BAD_REQUEST);
         if (!user.getName().matches("^[a-zA-Z]{4,}$")||!user.getLastName().matches("^[a-zA-Z]{4,}$")) return new ResponseEntity<>("Solo aceptamos letras o espacios para los campos nombre y apellido, cada uno con un minimo de 4 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         if (!user.getPassword().matches("^\\S{3,}\\S$")) return new ResponseEntity<>("La contraseña necesita de un minimo de 4 caracteres.",HttpStatus.BAD_REQUEST);
@@ -64,7 +68,7 @@ public class UserEntityController {
             content = @Content(schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "Credenciales incorrectas", description = "Los datos ingresados no coinciden.", value = "El email o password no son correctas")}))
     })
     @PostMapping("/public/login")
-    public ResponseEntity<?> login(@RequestBody LoginUser login){
+    public ResponseEntity<?> login(@RequestBody LoginUser login) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, JOSEException {
         return userEntityService.login(login);
     }
 

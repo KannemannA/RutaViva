@@ -1,7 +1,7 @@
 package com.bookingProject.tour.exp.auth;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,12 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
 
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
@@ -34,24 +36,20 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenCrudo = request.getHeader("Authorization");
-        try {
-            if (tokenCrudo == null || !tokenCrudo.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-        String token = tokenCrudo.substring(7);
-        String email = jwtUtils.getUsernameFromToken(token);
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            if (jwtUtils.isTokenValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        if (tokenCrudo == null || !tokenCrudo.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
-        filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException | SignatureException ex){
+        String token = tokenCrudo.substring(7);
+        try {
+            JWTClaimsSet claims = jwtUtils.parseJWT(token);
+            UserDetails userDetails= userDetailsService.loadUserByUsername(claims.getSubject());
+            UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(claims.getSubject(), null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        }
+        catch (JOSEException | NoSuchAlgorithmException | InvalidKeySpecException | ParseException ex){
             resolver.resolveException(request,response,null,ex);
         }
+        filterChain.doFilter(request, response);
     }
 }

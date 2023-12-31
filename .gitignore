@@ -1,6 +1,6 @@
 CREDENTIALS.md
 *.env
-jwtKeys/
+src/main/resources/jwtKeys/
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
