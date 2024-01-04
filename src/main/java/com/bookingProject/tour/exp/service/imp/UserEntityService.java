@@ -82,7 +82,7 @@ public class UserEntityService implements IUserEntityService {
             userEntity.setName(userEntityDTO.getName());
             userEntity.setLastName(userEntityDTO.getLastName());
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-            userEntity.setRole(userEntityDTO.getRol());
+            userEntity.setRole(userEntityDTO.getRole());
             userEntityRepository.save(userEntity);
             return new ResponseEntity<>(userEntity, HttpStatus.OK);
         } return new ResponseEntity<>("No se encontró el id en la base de datos",HttpStatus.NOT_FOUND);
@@ -95,7 +95,7 @@ public class UserEntityService implements IUserEntityService {
             UserEntity user= find.get();
             if (userEntityDTO.getName()!=null) user.setName(userEntityDTO.getName());
             if (userEntityDTO.getLastName()!=null) user.setLastName(userEntityDTO.getLastName());
-            if (userEntityDTO.getRol()!=null) user.setRole(userEntityDTO.getRol());
+            if (userEntityDTO.getRole()!=null) user.setRole(userEntityDTO.getRole());
             if (userEntityDTO.getPassword()!=null) user.setPassword(passwordEncoder.encode(userEntityDTO.getPassword()));
             userEntityRepository.save(user);
             return new ResponseEntity<>(user,HttpStatus.OK);

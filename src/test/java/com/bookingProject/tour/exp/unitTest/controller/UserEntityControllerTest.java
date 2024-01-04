@@ -6,6 +6,7 @@ import com.bookingProject.tour.exp.controller.UserEntityController;
 import com.bookingProject.tour.exp.entity.dto.userEntity.LoginUser;
 import com.bookingProject.tour.exp.entity.dto.userEntity.SaveUser;
 import com.bookingProject.tour.exp.entity.dto.userEntity.UserEntityDTO;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +25,12 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -37,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserEntityController.class)
 @Import(SecurityConfig.class)
-class UserEntityControllerTestU {
+class UserEntityControllerTest {
     @Autowired
     private MockMvc mvc;
     @MockBean
@@ -58,6 +61,7 @@ class UserEntityControllerTestU {
 
     @BeforeEach
     void setUp() {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         user1= UserEntity.builder()
                 .name("juan").lastName("pepe")
                 .email("ballena@hotmail.com.ar").password(new BCryptPasswordEncoder().encode("superSecret"))
@@ -74,62 +78,71 @@ class UserEntityControllerTestU {
     }
 
     @Test
-    void createUserSuccessful() throws Exception {
+    void register_user_successful_test() throws Exception {
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
         mvc.perform(post("/api/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isCreated());
+        verify(service,times(1)).registrarUsuario(saveUser);
     }
 
     @Test
-    void createUserWrongEmail() throws Exception {
+    void register_user_unsuccessful_with_wrong_email_test() throws Exception {
         saveUser.setEmail("a@a.c");
         //saveUser.setEmail("a@a.ct"); esto pasa la validacion.
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/api/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Introduzca un correo con formato valido. ej example@example.com");
     }
 
     @Test
-    void createUserWrongName() throws Exception {
+    void register_user_unsuccessful_with_wrong_name_test() throws Exception {
         saveUser.setName("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/api/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Solo aceptamos letras o espacios para los campos nombre y apellido, cada uno con un minimo de 4 caracteres. (no cuentan como caracter los espacios)");
     }
 
     @Test
-    void createUserWrongLastName() throws Exception {
+    void register_user_unsuccessful_with_wrong_last_name_test() throws Exception {
         saveUser.setLastName("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/api/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Solo aceptamos letras o espacios para los campos nombre y apellido, cada uno con un minimo de 4 caracteres. (no cuentan como caracter los espacios)");
     }
 
     @Test
-    void createUserWrongPassword() throws Exception {
+    void register_user_unsuccessful_with_wrong_password_test() throws Exception {
         saveUser.setPassword("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/api/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("La contraseña necesita de un minimo de 4 caracteres.");
     }
 
     @Test
-    void login() throws Exception {
+    void login_user_successful_test() throws Exception {
         LoginUser login= new LoginUser(user1.getEmail(),user1.getPassword());
         String loginUser= mapper.writeValueAsString(login);
         doReturn(new ResponseEntity<>("token",HttpStatus.OK)).when(service).login(any(LoginUser.class));
@@ -137,47 +150,98 @@ class UserEntityControllerTestU {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginUser)).andDo(print())
                 .andExpect(status().isOk());
+        verify(service,times(1)).login(login);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void traerTodo() throws Exception {
+    void get_all_user_successful_test() throws Exception {
         doReturn(new ArrayList<>(List.of(user1))).when(service).traerTodo();
-        mvc.perform(get("/api/user/admin/traerTodo")).andDo(print())
-                .andExpect(status().isOk());
+        MvcResult result=mvc.perform(get("/api/user/admin/traerTodo")).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        List list=mapper.readValue(result.getResponse().getContentAsString(),List.class);
+        assertThat(list.isEmpty()).isFalse();
+        verify(service,times(1)).traerTodo();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void detalleUser() throws Exception {
+    void get_details_user_successful_test() throws Exception {
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).traerId(anyLong());
-        mvc.perform(get("/api/user/admin/detalle/1")).andDo(print())
-                .andExpect(status().isOk());
+        MvcResult result=mvc.perform(get("/api/user/admin/detalle/1")).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        UserEntityDTO body= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
+        assertThat(body.getId()).isEqualTo(user1.getId());
+        assertThat(body.getName()).isEqualTo(user1.getName());
+        assertThat(body.getLastName()).isEqualTo(user1.getLastName());
+        assertThat(body.getEmail()).isEqualTo(user1.getEmail());
+        assertThat(body.getRole()).isEqualTo(user1.getRole());
+        assertThat(body.getPassword()).isEqualTo(user1.getPassword());
+        verify(service,times(1)).traerId(1L);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void modificar() throws Exception {
+    void modify_user_successful_test() throws Exception {
         String body = mapper.writeValueAsString(userEntityDTO);
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
-        mvc.perform(put("/api/user/admin/modificar")
+        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        UserEntityDTO bodyResult= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
+        assertThat(bodyResult.getId()).isEqualTo(user1.getId());
+        assertThat(bodyResult.getName()).isEqualTo(user1.getName());
+        assertThat(bodyResult.getLastName()).isEqualTo(user1.getLastName());
+        assertThat(bodyResult.getEmail()).isEqualTo(user1.getEmail());
+        assertThat(bodyResult.getRole()).isEqualTo(user1.getRole());
+        assertThat(bodyResult.getPassword()).isEqualTo(user1.getPassword());
+        verify(service,times(1)).modificarUsuario(userEntityDTO);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void parcialMod()  throws Exception{
+    void modify_user_unsuccessful_with_wrong_id_test() throws Exception {
+        userEntityDTO.setId(1L);
         String body = mapper.writeValueAsString(userEntityDTO);
-        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).patchMod(any(UserEntityDTO.class));
-        mvc.perform(patch("/api/user/admin/parcialMod")
+        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
+        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Introduzca un numero mayor a uno.");
     }
 
     @Test
-    void delete() throws Exception {
+    @WithMockUser(roles = {"ADMIN"})
+    void partial_modify_user_successful_test()  throws Exception{
+        String body = mapper.writeValueAsString(userEntityDTO);
+        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).patchMod(any(UserEntityDTO.class));
+        MvcResult result=mvc.perform(patch("/api/user/admin/parcialMod")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        UserEntityDTO bodyResult= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
+        assertThat(bodyResult.getId()).isEqualTo(user1.getId());
+        assertThat(bodyResult.getName()).isEqualTo(user1.getName());
+        assertThat(bodyResult.getLastName()).isEqualTo(user1.getLastName());
+        assertThat(bodyResult.getEmail()).isEqualTo(user1.getEmail());
+        assertThat(bodyResult.getRole()).isEqualTo(user1.getRole());
+        assertThat(bodyResult.getPassword()).isEqualTo(user1.getPassword());
+        verify(service,times(1)).patchMod(userEntityDTO);
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void delete_user_successful_test() throws Exception {
+        doReturn(new ResponseEntity<>(HttpStatus.OK)).when(service).borrarUsuario(anyLong());
+        mvc.perform(delete("/api/user/admin/eliminar/2"))
+                .andExpect(status().isOk());
+        verify(service,times(1)).borrarUsuario(anyLong());
     }
 }

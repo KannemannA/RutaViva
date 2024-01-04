@@ -24,5 +24,5 @@ public class UserEntityDTO {
     private String email;
     @NotBlank
     private String password;
-    private ERole rol;
+    private ERole role;
 }
