@@ -8,7 +8,6 @@ import com.bookingProject.tour.exp.entity.dto.userEntity.SaveUser;
 import com.bookingProject.tour.exp.entity.dto.userEntity.UserEntityDTO;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -54,27 +54,32 @@ class UserEntityControllerTest {
     private UserEntityDTO userEntityDTO;
     private final ObjectMapper mapper= new ObjectMapper();
 
-    @BeforeAll
-    static void beforeAll() {
-
-    }
-
     @BeforeEach
     void setUp() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
-        user1= UserEntity.builder()
-                .name("juan").lastName("pepe")
-                .email("ballena@hotmail.com.ar").password(new BCryptPasswordEncoder().encode("superSecret"))
+        user1= builder();
+        saveUser= mapper.convertValue(user1,SaveUser.class);
+        userEntityDTO= mapper.convertValue(user1,UserEntityDTO.class);
+        user1.setPassword(new BCryptPasswordEncoder().encode("superSecret"));
+    }
+
+    public UserEntity builder(){
+        return UserEntity.builder()
+                .name("juan").lastName("pepe").id(2L)
+                .email("ballena@hotmail.com.ar").password("superSecret")
                 .role(ERole.USER).build();
-        saveUser= SaveUser.builder()
-                .name("juan").lastName("pepe").email("ballena@hotmail.com.ar")
-                .password("superSecret")
-                .build();
-        userEntityDTO= UserEntityDTO.builder()
-                .name("juan").lastName("pepe")
-                .email("ballena@hotmail.com.ar")
-                .password("superSecret").id(2L)
-                .build();
+    }
+
+    @Test
+    void login_user_successful_test() throws Exception {
+        LoginUser login= new LoginUser(user1.getEmail(),user1.getPassword());
+        String loginUser= mapper.writeValueAsString(login);
+        doReturn(new ResponseEntity<>("token",HttpStatus.OK)).when(service).login(any(LoginUser.class));
+        mvc.perform(post("/api/user/public/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginUser)).andDo(print())
+                .andExpect(status().isOk());
+        verify(service,times(1)).login(login);
     }
 
     @Test
@@ -100,6 +105,7 @@ class UserEntityControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isEqualTo("Introduzca un correo con formato valido. ej example@example.com");
+        verify(service,times(0)).registrarUsuario(any(SaveUser.class));
     }
 
     @Test
@@ -113,6 +119,7 @@ class UserEntityControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isEqualTo("Solo aceptamos letras o espacios para los campos nombre y apellido, cada uno con un minimo de 4 caracteres. (no cuentan como caracter los espacios)");
+        verify(service,times(0)).registrarUsuario(any(SaveUser.class));
     }
 
     @Test
@@ -126,6 +133,7 @@ class UserEntityControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isEqualTo("Solo aceptamos letras o espacios para los campos nombre y apellido, cada uno con un minimo de 4 caracteres. (no cuentan como caracter los espacios)");
+        verify(service,times(0)).registrarUsuario(any(SaveUser.class));
     }
 
     @Test
@@ -139,47 +147,22 @@ class UserEntityControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertThat(result.getResponse().getContentAsString()).isEqualTo("La contraseña necesita de un minimo de 4 caracteres.");
-    }
-
-    @Test
-    void login_user_successful_test() throws Exception {
-        LoginUser login= new LoginUser(user1.getEmail(),user1.getPassword());
-        String loginUser= mapper.writeValueAsString(login);
-        doReturn(new ResponseEntity<>("token",HttpStatus.OK)).when(service).login(any(LoginUser.class));
-        mvc.perform(post("/api/user/public/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginUser)).andDo(print())
-                .andExpect(status().isOk());
-        verify(service,times(1)).login(login);
+        verify(service,times(0)).registrarUsuario(any(SaveUser.class));
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void get_all_user_successful_test() throws Exception {
-        doReturn(new ArrayList<>(List.of(user1))).when(service).traerTodo();
-        MvcResult result=mvc.perform(get("/api/user/admin/traerTodo")).andDo(print())
-                .andExpect(status().isOk())
+    void modify_user_unsuccessful_with_wrong_id_test() throws Exception {
+        userEntityDTO.setId(1L);
+        String body = mapper.writeValueAsString(userEntityDTO);
+        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
+        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)).andDo(print())
+                .andExpect(status().isBadRequest())
                 .andReturn();
-        List list=mapper.readValue(result.getResponse().getContentAsString(),List.class);
-        assertThat(list.isEmpty()).isFalse();
-        verify(service,times(1)).traerTodo();
-    }
-
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
-    void get_details_user_successful_test() throws Exception {
-        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).traerId(anyLong());
-        MvcResult result=mvc.perform(get("/api/user/admin/detalle/1")).andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-        UserEntityDTO body= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
-        assertThat(body.getId()).isEqualTo(user1.getId());
-        assertThat(body.getName()).isEqualTo(user1.getName());
-        assertThat(body.getLastName()).isEqualTo(user1.getLastName());
-        assertThat(body.getEmail()).isEqualTo(user1.getEmail());
-        assertThat(body.getRole()).isEqualTo(user1.getRole());
-        assertThat(body.getPassword()).isEqualTo(user1.getPassword());
-        verify(service,times(1)).traerId(1L);
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Introduzca un numero mayor a uno.");
+        verify(service,times(0)).modificarUsuario(any(UserEntityDTO.class));
     }
 
     @Test
@@ -204,20 +187,6 @@ class UserEntityControllerTest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    void modify_user_unsuccessful_with_wrong_id_test() throws Exception {
-        userEntityDTO.setId(1L);
-        String body = mapper.writeValueAsString(userEntityDTO);
-        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
-        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body)).andDo(print())
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertThat(result.getResponse().getContentAsString()).isEqualTo("Introduzca un numero mayor a uno.");
-    }
-
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
     void partial_modify_user_successful_test()  throws Exception{
         String body = mapper.writeValueAsString(userEntityDTO);
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).patchMod(any(UserEntityDTO.class));
@@ -234,6 +203,35 @@ class UserEntityControllerTest {
         assertThat(bodyResult.getRole()).isEqualTo(user1.getRole());
         assertThat(bodyResult.getPassword()).isEqualTo(user1.getPassword());
         verify(service,times(1)).patchMod(userEntityDTO);
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void get_all_user_successful_test() throws Exception {
+        doReturn(new ArrayList<>(Collections.singletonList(user1))).when(service).traerTodo();
+        MvcResult result=mvc.perform(get("/api/user/admin/traerTodo")).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        ArrayList list=mapper.readValue(result.getResponse().getContentAsString(),ArrayList.class);
+        assertThat(list.isEmpty()).isFalse();
+        verify(service,times(1)).traerTodo();
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void get_details_user_successful_test() throws Exception {
+        doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).traerId(anyLong());
+        MvcResult result=mvc.perform(get("/api/user/admin/detalle/1")).andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        UserEntityDTO body= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
+        assertThat(body.getId()).isEqualTo(user1.getId());
+        assertThat(body.getName()).isEqualTo(user1.getName());
+        assertThat(body.getLastName()).isEqualTo(user1.getLastName());
+        assertThat(body.getEmail()).isEqualTo(user1.getEmail());
+        assertThat(body.getRole()).isEqualTo(user1.getRole());
+        assertThat(body.getPassword()).isEqualTo(user1.getPassword());
+        verify(service,times(1)).traerId(1L);
     }
 
     @Test

@@ -32,7 +32,7 @@ public class CategoryService implements ICategoryService {
                 .description(saveCategory.getDescription())
                 .thumbnail(result.get(0))
                 .build();
-        categoryRepository.save(category);
+        category=categoryRepository.save(category);
         return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
 

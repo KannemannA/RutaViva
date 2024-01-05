@@ -24,12 +24,14 @@ public class PoliticService implements IPoliticService {
         Politic politic = Politic.builder()
                 .title(savePolitic.getTitle())
                 .description(savePolitic.getDescription()).build();
-        politicRepository.save(politic);
+        politic=politicRepository.save(politic);
         return new ResponseEntity<>(politic, HttpStatus.CREATED);
     }
 
     @Override
-    public List<Politic> traerPolitica() {return politicRepository.findAll(); }
+    public List<Politic> traerPolitica() {
+        return politicRepository.findAll();
+    }
 
     @Override
     public ResponseEntity<?> traerId(Long id) {
@@ -60,8 +62,10 @@ public class PoliticService implements IPoliticService {
                 politic.setTitle(politicDTO.getTitle());
                 politicRepository.save(politic);
             }
-            if(politicDTO.getDescription()!=null) politic.setDescription(politicDTO.getDescription());
-            politicRepository.save(politic);
+            if(politicDTO.getDescription()!=null){
+                politic.setDescription(politicDTO.getDescription());
+                politicRepository.save(politic);
+            }
             return new ResponseEntity<>(politic, HttpStatus.OK);
         }else return new ResponseEntity<>("No se encontró la politica en la base de datos.", HttpStatus.NOT_FOUND);
     }

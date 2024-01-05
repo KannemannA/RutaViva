@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -27,18 +28,17 @@ class PoliticServiceTest {
     @InjectMocks
     private PoliticService service;
     AutoCloseable autoCloseable;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper=new ObjectMapper();
     private Politic politic;
     private PoliticDTO politicDTO;
     private ResponseEntity<?> result;
 
     @BeforeEach
     void setUp() {
-        mapper= new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         autoCloseable= MockitoAnnotations.openMocks(this);
-        politicDTO= crearPoliticDto();
-        politic= mapper.convertValue(politicDTO, Politic.class);
+        politic= builder();
+        politicDTO= mapper.convertValue(politic, PoliticDTO.class);
     }
 
     @AfterEach
@@ -46,93 +46,118 @@ class PoliticServiceTest {
         autoCloseable.close();
     }
 
-    public PoliticDTO crearPoliticDto(){
-        return PoliticDTO.builder()
+    public Politic builder(){
+        return Politic.builder()
                 .id(1L)
                 .title("someTitle")
                 .description("someDescription").build();
     }
 
     @Test
-    void crearPoliticaTest() {
-        SavePolitic savePolitic= mapper.convertValue(crearPoliticDto(), SavePolitic.class);
+    void save_politic_successful_test() {
+        SavePolitic savePolitic= mapper.convertValue(politic, SavePolitic.class);
         when(repository.save(any(Politic.class))).thenReturn(politic);
         result= service.crearPolitica(savePolitic);
-        assertThat(result.getStatusCode().value()).isEqualTo(201);
-        assertThat(result.getBody()).isInstanceOf(Politic.class);
+        Politic resultPolitic= mapper.convertValue(result.getBody(),Politic.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(resultPolitic.getId()).isEqualTo(politic.getId());
+        assertThat(resultPolitic.getTitle()).isEqualTo(politic.getTitle());
+        assertThat(resultPolitic.getDescription()).isEqualTo(politic.getDescription());
+        verify(repository,times(1)).save(any(Politic.class));
     }
 
     @Test
-    void traerPoliticaTest() {
+    void get_all_politic_successful_test() {
         when(repository.findAll()).thenReturn(new ArrayList<>(Collections.singletonList(politic)));
         assertThat(service.traerPolitica().isEmpty()).isFalse();
+        verify(repository,times(1)).findAll();
     }
 
     @Test
-    void traerIdTestSuccessful() {
-        when(repository.findById(1L)).thenReturn(Optional.of(politic));
+    void get_details_politic_successful_test() {
+        when(repository.findById(anyLong())).thenReturn(Optional.of(politic));
         result= service.traerId(1L);
-        assertThat(result.getStatusCode().value()).isEqualTo(200);
-        assertThat(result.getBody()).isInstanceOf(Politic.class);
+        Politic resultPolitic= mapper.convertValue(result.getBody(),Politic.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultPolitic.getId()).isEqualTo(politic.getId());
+        assertThat(resultPolitic.getTitle()).isEqualTo(politic.getTitle());
+        assertThat(resultPolitic.getDescription()).isEqualTo(politic.getDescription());
+        verify(repository,times(1)).findById(anyLong());
     }
 
     @Test
-    void traerIdTestUnsuccessful() {
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    void get_details_politic_unsuccessful_with_wrong_id_test() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
         result= service.traerId(1L);
-        assertThat(result.getStatusCode().value()).isEqualTo(404);
-        assertThat(result.getBody()).isInstanceOf(String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(result.getBody()).isEqualTo("No se encontró la politica en la base de datos.");
+        verify(repository,times(1)).findById(anyLong());
     }
 
     @Test
-    void modificarPoliticaTestSuccessful() {
+    void modify_politic_successful_test() {
         when(repository.findById(politicDTO.getId())).thenReturn(Optional.of(politic));
-        when(repository.save(any(Politic.class))).thenReturn(politic);
         result=service.modificarPolitica(politicDTO);
-        assertThat(result.getStatusCode().value()).isEqualTo(200);
-        assertThat(result.getBody()).isInstanceOf(Politic.class);
+        Politic resultPolitic= mapper.convertValue(result.getBody(),Politic.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultPolitic.getId()).isEqualTo(politic.getId());
+        assertThat(resultPolitic.getTitle()).isEqualTo(politic.getTitle());
+        assertThat(resultPolitic.getDescription()).isEqualTo(politic.getDescription());
+        verify(repository,times(1)).save(any(Politic.class));
+        verify(repository,times(1)).findById(anyLong());
     }
 
     @Test
-    void modificarPoliticaTestUnsuccessful() {
+    void modify_politic_unsuccessful_with_wrong_id_test() {
         when(repository.findById(politicDTO.getId())).thenReturn(Optional.empty());
         result=service.modificarPolitica(politicDTO);
-        assertThat(result.getStatusCode().value()).isEqualTo(404);
-        assertThat(result.getBody()).isInstanceOf(String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(result.getBody()).isEqualTo("No se encontró la politica en la base de datos.");
+        verify(repository,times(1)).findById(anyLong());
+        verify(repository,times(0)).save(any(Politic.class));
     }
 
     @Test
-    void parcialModTestSuccessful() {
+    void partial_modify_politic_successful_test() {
         when(repository.findById(politicDTO.getId())).thenReturn(Optional.of(politic));
-        when(repository.save(any(Politic.class))).thenReturn(politic);
         result=service.parcialMod(politicDTO);
-        assertThat(result.getStatusCode().value()).isEqualTo(200);
-        assertThat(result.getBody()).isInstanceOf(Politic.class);
+        Politic resultPolitic=mapper.convertValue(result.getBody(),Politic.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultPolitic.getId()).isEqualTo(politic.getId());
+        assertThat(resultPolitic.getTitle()).isEqualTo(politic.getTitle());
+        assertThat(resultPolitic.getDescription()).isEqualTo(politic.getDescription());
+        verify(repository,times(1)).findById(anyLong());
     }
 
     @Test
-    void parcialModTestUnsuccessful() {
+    void partial_modify_politic_unsuccessful_with_wrong_id_test() {
         when(repository.findById(politicDTO.getId())).thenReturn(Optional.empty());
         result=service.parcialMod(politicDTO);
-        assertThat(result.getStatusCode().value()).isEqualTo(404);
-        assertThat(result.getBody()).isInstanceOf(String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(result.getBody()).isEqualTo("No se encontró la politica en la base de datos.");
+        verify(repository,times(1)).findById(anyLong());
+        verify(repository,times(0)).save(any(Politic.class));
     }
 
     @Test
-    void eliminarPoliticaTestSuccessful() {
+    void delete_politic_successful_test() {
         mock(IPoliticRepository.class, Mockito.CALLS_REAL_METHODS);
-        when(repository.findById(1L)).thenReturn(Optional.of(politic));
-        doAnswer(Answers.CALLS_REAL_METHODS).when(repository).deleteById(any());
+        when(repository.findById(anyLong())).thenReturn(Optional.of(politic));
+        doAnswer(Answers.CALLS_REAL_METHODS).when(repository).deleteById(anyLong());
         result= service.eliminarPolitica(1L);
-        assertThat(result.getStatusCode().value()).isEqualTo(200);
-        assertThat(result.getBody()).isEqualTo(null);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNull();
+        verify(repository,times(1)).findById(anyLong());
+        verify(repository,times(1)).deleteById(anyLong());
     }
 
     @Test
-    void eliminarPoliticaTestUnsuccessful() {
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+    void delete_politic_unsuccessful_with_wrong_id_test() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
         result= service.eliminarPolitica(1L);
-        assertThat(result.getStatusCode().value()).isEqualTo(404);
-        assertThat(result.getBody()).isInstanceOf(String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(result.getBody()).isEqualTo("No se encontró la politica en la base de datos.");
+        verify(repository,times(1)).findById(anyLong());
+        verify(repository,times(0)).deleteById(anyLong());
     }
 }
