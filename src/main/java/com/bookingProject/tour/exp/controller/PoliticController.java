@@ -48,8 +48,8 @@ public class PoliticController {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<?> guardarPolitic(@RequestBody SavePolitic savePolitic) {
-        if (savePolitic.getTitle()==null||!savePolitic.getTitle().matches("^[a-zA-Z]{4,}$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
-        if (savePolitic.getDescription()==null||!savePolitic.getDescription().matches("^\\S{19,}\\S$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (savePolitic.getTitle()==null||!savePolitic.getTitle().matches("^(.*[a-zA-Z]){4,}.*$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (savePolitic.getDescription()==null||!savePolitic.getDescription().matches("^(.*\\S){20,}.*$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return politicService.crearPolitica(savePolitic);
     }
 
@@ -98,8 +98,8 @@ public class PoliticController {
     @Transactional
     public ResponseEntity<?> modificar(@RequestBody PoliticDTO politicDTO) {
         if (politicDTO.getId()==null||politicDTO.getId()<87L) return new ResponseEntity<>("Introduzca un numero mayor a 86.",HttpStatus.BAD_REQUEST);
-        if (politicDTO.getTitle()==null||!politicDTO.getTitle().matches("^[a-zA-Z]{4,}$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
-        if (politicDTO.getDescription()==null||!politicDTO.getDescription().matches("^\\S{19,}\\S$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (politicDTO.getTitle()==null||!politicDTO.getTitle().matches("^(.*[a-zA-Z]){4,}.*$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (politicDTO.getDescription()==null||!politicDTO.getDescription().matches("^(.*\\S){20,}.*$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return politicService.modificarPolitica(politicDTO);
     }
 
@@ -126,8 +126,8 @@ public class PoliticController {
     @Transactional
     public ResponseEntity<?> parcialMod(@RequestBody PoliticDTO politicDTO) {
         if (politicDTO.getId()==null||politicDTO.getId()<87L) return new ResponseEntity<>("Introduzca un numero mayor a 86.",HttpStatus.BAD_REQUEST);
-        if (politicDTO.getTitle()!=null&&!politicDTO.getTitle().matches("^[a-zA-Z]{4,}$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
-        if (politicDTO.getDescription()!=null&&!politicDTO.getDescription().matches("^\\S{19,}\\S$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (politicDTO.getTitle()!=null&&!politicDTO.getTitle().matches("^(.*[a-zA-Z]){4,}.*$")) return new ResponseEntity<>("Se necesita un nombre para la politica de minimo 4 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (politicDTO.getDescription()!=null&&!politicDTO.getDescription().matches("^(.*\\S){20,}.*$")) return new ResponseEntity<>("Se necesita una descripcion para la politica de minimo 20 caracteres. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return politicService.parcialMod(politicDTO);
     }
 
