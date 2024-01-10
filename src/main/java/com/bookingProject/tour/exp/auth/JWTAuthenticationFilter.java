@@ -46,10 +46,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails= userDetailsService.loadUserByUsername(claims.getSubject());
             UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(claims.getSubject(), null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            filterChain.doFilter(request, response);
         }
         catch (JOSEException | NoSuchAlgorithmException | InvalidKeySpecException | ParseException ex){
             resolver.resolveException(request,response,null,ex);
         }
-        filterChain.doFilter(request, response);
     }
 }

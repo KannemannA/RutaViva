@@ -24,6 +24,7 @@ public class UserEntity implements UserDetails {
     private Long id;
     private String name;
     private String lastName;
+    @Column(unique = true)
     private String email;
     private String password;
     @Enumerated(value = EnumType.STRING)
