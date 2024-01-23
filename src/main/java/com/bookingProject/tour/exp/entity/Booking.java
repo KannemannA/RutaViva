@@ -20,6 +20,7 @@ public class Booking {
     @SequenceGenerator(name = "booking_secuence",sequenceName = "booking_secuence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "booking_secuence")
     private Long id;
+    @Column(length = 20000)
     private List<LocalDate> reservedDate;
     @ManyToOne
     @JoinColumn(name = "id_user",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))

@@ -13,4 +13,6 @@ public interface IProductRepository extends JpaRepository<Product,Long> {
     List<Product> findByCategoryId(Long categoryId);
     @Query("SELECT p FROM Product p JOIN p.characteristics c WHERE c.id = :characterId")
     List<Product> findByCharacterId(Long characterId);
+
+    List<Product> findByIdGreaterThan(Long id);
 }

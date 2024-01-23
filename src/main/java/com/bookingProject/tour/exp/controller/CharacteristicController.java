@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/character")
+@RequestMapping("/character")
 @Tag(name = "4. CARACTERISTICAS - Endpoints", description = "Contiene la lógica necesaria para la gestión de caracteristicas de productos")
 public class CharacteristicController {
     @Autowired
@@ -39,7 +39,7 @@ public class CharacteristicController {
             @ApiResponse(responseCode = "400", description = "No se pudo completar la operación.",
             content = @Content(schema = @Schema(implementation = String.class), examples = {
                     @ExampleObject(name = "Características existente", description = "No se permiten crear dos características con el mismo nombre.", value = "El nombre de la característica ya esta en uso. Por favor elige un nombre de característica diferente."),
-                    @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
+                    @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
                     @ExampleObject(name = "Imagen inválida", description = "Las extensiones de archivos validos que aceptamos son: jpg, png, gif, jpeg y svg.", value = "Solo aceptamos archivos con extensiones jpg, png, gif, jpeg y svg"),
                     @ExampleObject(name = "Imagen requerida", description = "Es requerimiento adjuntar una imagen representativa.", value = "Se necesita una imagen representativa para la característica.")})),
     })
@@ -50,7 +50,7 @@ public class CharacteristicController {
     @Transactional
     public ResponseEntity<?> guardarCharacter(@ModelAttribute SaveCharacteristic saveCharacteristic) throws JsonProcessingException {
         if (saveCharacteristic.getIcon()==null||saveCharacteristic.getIcon().getSize()==0) return new ResponseEntity<>("Se necesita una imagen representativa para la característica.",HttpStatus.BAD_REQUEST);
-        if (saveCharacteristic.getName()==null||!saveCharacteristic.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (saveCharacteristic.getName()!=null&&!saveCharacteristic.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return characteristicService.guardarCharacter(saveCharacteristic);
     }
 
@@ -78,7 +78,7 @@ public class CharacteristicController {
     }
 
     @Operation(summary = "Utilice este endpoint para modificar todos los campos de características de productos", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las características de muestra, en este caso los IDs menores a 6.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las características de muestra, en este caso los IDs menores a 7.
             
             Es necesario que todos los campos contengan datos válidos. Para modificar características deberá crear nuevas características que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse(responseCode = "200", description = "Peticion correcta.",
@@ -87,7 +87,7 @@ public class CharacteristicController {
             content = @Content(schema = @Schema(implementation = String.class), examples = {
                     @ExampleObject(name = "ID inválido", description = "Solo se permiten ID mayores a 6", value = "Introduzca un numero mayor a 6."),
                     @ExampleObject(name = "Características existente", description = "No se permiten crear dos características con el mismo nombre.", value = "El nombre de la característica ya esta en uso. Por favor elige un nombre de característica diferente."),
-                    @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
+                    @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
                     @ExampleObject(name = "Imagen inválida", description = "Las extensiones de archivos validos que aceptamos son: jpg, png, gif, jpeg y svg.", value = "Solo aceptamos archivos con extensiones jpg, png, gif, jpeg y svg"),
                     @ExampleObject(name = "Imagen requerida", description = "Es requerimiento adjuntar una imagen representativa.", value = "Se necesita una imagen representativa para la característica.")})),
             @ApiResponse(responseCode = "404", description = "Característica no encontrada.",
@@ -103,12 +103,12 @@ public class CharacteristicController {
     public ResponseEntity<?> modificar(@ModelAttribute CharacteristicDTO characteristicDTO) throws JsonProcessingException {
         if (characteristicDTO.getId()==null||characteristicDTO.getId()<7L) return new ResponseEntity<>("Introduzca un numero mayor a 6.",HttpStatus.BAD_REQUEST);
         if (characteristicDTO.getIcon()==null||characteristicDTO.getIcon().getSize()==0) return new ResponseEntity<>("Se necesita una imagen representativa para la característica.",HttpStatus.BAD_REQUEST);
-        if (characteristicDTO.getName()==null||!characteristicDTO.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (characteristicDTO.getName()!=null&&!characteristicDTO.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return characteristicService.modificarCharacter(characteristicDTO);
     }
 
     @Operation(summary = "Utilice este endpoint para modificar algunos de los campos de la característica de producto", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las características de muestra, en este caso los IDs menores a 6.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las características de muestra, en este caso los IDs menores a 7.
             
             Es necesario que el campo ID y los campos a modificar contengan datos válidos. Para modificar características deberá crear nuevas características que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse(responseCode = "200", description = "Peticion correcta.",
@@ -117,7 +117,7 @@ public class CharacteristicController {
                     content = @Content(schema = @Schema(implementation = String.class), examples = {
                             @ExampleObject(name = "ID inválido", description = "Solo se permiten ID mayores a 6", value = "Introduzca un numero mayor a 6."),
                             @ExampleObject(name = "Características existente", description = "No se permiten crear dos características con el mismo nombre.", value = "El nombre de la característica ya esta en uso. Por favor elige un nombre de característica diferente."),
-                            @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
+                            @ExampleObject(name = "Nombre inválido", description = "Introduzca un nombre representativo para la característica. Minimo 3 caracteres.", value = "Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)"),
                             @ExampleObject(name = "Imagen inválida", description = "Las extensiones de archivos validos que aceptamos son: jpg, png, gif, jpeg y svg.", value = "Solo aceptamos archivos con extensiones jpg, png, gif, jpeg y svg"),
                             @ExampleObject(name = "Imagen requerida", description = "Es requerimiento adjuntar una imagen representativa.", value = "Se necesita una imagen representativa para la característica.")})),
             @ApiResponse(responseCode = "404", description = "Característica no encontrada.",
@@ -133,7 +133,7 @@ public class CharacteristicController {
     public ResponseEntity<?> parcialMod(@ModelAttribute CharacteristicDTO characteristicDTO) throws JsonProcessingException {
         if (characteristicDTO.getId()==null||characteristicDTO.getId()<7L) return new ResponseEntity<>("Introduzca un numero mayor a 6.",HttpStatus.BAD_REQUEST);
         if (characteristicDTO.getIcon()!=null&&characteristicDTO.getIcon().getSize()==0) return new ResponseEntity<>("Se necesita una imagen representativa para la característica.",HttpStatus.BAD_REQUEST);
-        if (characteristicDTO.getName()!=null&&!characteristicDTO.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la categoria de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
+        if (characteristicDTO.getName()!=null&&!characteristicDTO.getName().matches("^[a-zA-Z]{3,}$")) return new ResponseEntity<>("Se necesita un nombre para la caracteristica de minimo 3 caracteres. Solo aceptamos letras o espacios. (no cuentan como caracter los espacios)",HttpStatus.BAD_REQUEST);
         return characteristicService.parcialMod(characteristicDTO);
     }
 

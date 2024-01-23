@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/category")
+@RequestMapping("/category")
 @Tag(name = "3. CATEGORIAS - Endpoints", description = "Contiene la lógica necesaria para la gestión de categorias de productos")
 public class CategoryController {
     @Autowired
@@ -82,7 +82,7 @@ public class CategoryController {
     }
 
     @Operation(summary = "Utilice este endpoint para modificar todos los campos de la categoria", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las categorias de muestra, en este caso los IDs menores a 5.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las categorias de muestra, en este caso los IDs menores a 6.
             
             Es necesario que todos los campos contengan datos válidos. Para modificar categorias deberá crear nuevas categorias que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse( responseCode = "200",
@@ -116,7 +116,7 @@ public class CategoryController {
     }
 
     @Operation(summary = "Utilice este endpoint para modificar algunos de los campos de categoria", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las categorias de muestra, en este caso los IDs menores a 5.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las categorias de muestra, en este caso los IDs menores a 6.
             
             Es necesario que el campo ID y los campos a modificar contengan datos válidos. Para modificar categorias deberá crear nuevas categorias que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse( responseCode = "200",
@@ -149,7 +149,7 @@ public class CategoryController {
         return categoryService.parcialMod(categoryDTO);
     }
 
-    @Operation(summary = "Utilice este endpoint para borrar una categoria", description = "Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podrá eliminar las categorias de muestra, en este caso los IDs menores a 5.", responses = {
+    @Operation(summary = "Utilice este endpoint para borrar una categoria", description = "Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podrá eliminar las categorias de muestra, en este caso los IDs menores a 6.", responses = {
             @ApiResponse(responseCode = "200", description = "La categoria a sido eliminada correctamente."),
             @ApiResponse(responseCode = "400", description = "La categoria no se pudo eliminar correctamente.",
             content = @Content(schema = @Schema(implementation = String.class), examples = {

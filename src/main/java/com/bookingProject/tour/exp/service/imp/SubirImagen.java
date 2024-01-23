@@ -43,7 +43,7 @@ public class SubirImagen {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity("https://project-1.alejokannemann.com.ar/images/upload", requestEntity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity("https://project-1.alejokannemann.com.ar/v1/images/upload", requestEntity, String.class);
             return mapper.readValue(response.getBody(), new TypeReference<>() {});
         }
         return null;

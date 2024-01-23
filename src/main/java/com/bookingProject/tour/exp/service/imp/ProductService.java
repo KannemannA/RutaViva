@@ -202,6 +202,6 @@ public class ProductService implements IProductService {
             productsRepository.deleteById(id);
             return new ResponseEntity<>("",HttpStatus.OK);
         }
-        return new ResponseEntity<>("No se encontro el producto en nuestra bd.",HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("No se encontró el id en la base de datos",HttpStatus.NOT_FOUND);
     }
 }

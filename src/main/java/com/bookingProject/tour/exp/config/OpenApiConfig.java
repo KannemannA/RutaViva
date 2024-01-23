@@ -44,17 +44,7 @@ import java.lang.annotation.Target;
                         Tenga en cuenta que los productos, categorias, caracteristicas nuevos que guarde en la base de datos tiene una vigencia hasta las 00:00 AM (GMT-3), esto es una medida que tomé ya que estas entidades hacen uso de imagenes para ser guardadas y no existen muchos servicios de almacenamiento gratuitos con gran volumen de almacenamiento, asi como las entidades relacionadas.
                         """,
                 version = "1.0"
-        ),
-        servers = {
-                @Server(
-                        url = "https://project-1.alejokannemann.com.ar",
-                        description = "Prod ENV"),
-                @Server(
-                        url = "http://localhost:9090",
-                        description = "Test ENV"
-                )
-        }
-
+        )
 )
 @SecurityScheme(
         name = "JWT Security",

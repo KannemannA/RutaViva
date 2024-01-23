@@ -28,7 +28,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 @Tag(name = "1. USUARIOS - Endpoints",description = "Contiene la lógica necesaria para la gestión de usuarios")
 public class UserEntityController {
     @Autowired

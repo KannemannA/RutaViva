@@ -24,15 +24,15 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/politic")
-@Tag(name = "4. POLITICAS - Endpoints", description = "Contiene la lógica necesaria para la gestión de politicas de productos")
+@RequestMapping("/politic")
+@Tag(name = "5. POLITICAS - Endpoints", description = "Contiene la lógica necesaria para la gestión de politicas de productos")
 public class PoliticController {
 
     @Autowired
     private IPoliticService politicService;
 
     @Operation(summary = "Utilice este endpoint para crear una politica de producto", description = """
-            Tenga en cuanta que las nuevas politicas tendran una vigencia hasta las 00:00 AM (GMT-3).
+            Tenga en cuenta que las nuevas politicas que esten asignadas a productos tendran una vigencia hasta las 00:00 AM (GMT-3).
             
             Para concretar la operacion necesita hacer uso de un usuario con rol ADMIN.""", responses = {
             @ApiResponse(responseCode = "201", description = "Peticion correcta.",
@@ -76,9 +76,9 @@ public class PoliticController {
    }
 
     @Operation(summary = "Utilice este endpoint para modificar todos los campos de politicas de productos", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 86.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 87.
             
-            Es necesario que todos los campos contengan datos válidos. Para modificar politicas deberá crear nuevas politicas que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
+            Es necesario que todos los campos contengan datos válidos. Para modificar politicas deberá crear nuevas politicas que, si estan asignadas a productos tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse(responseCode = "200", description = "Peticion correcta.",
                     content = @Content(schema = @Schema(implementation = Politic.class))),
             @ApiResponse(responseCode = "400", description = "No se pudo completar la operacion.",
@@ -104,9 +104,9 @@ public class PoliticController {
     }
 
     @Operation(summary = "Utilice este endpoint para modificar algunos de los campos de la politica de productos", description = """
-            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 86.
+            Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 87.
             
-            Es necesario que el campo ID y los campos a modificar contengan datos válidos. Para modificar politicas deberá crear nuevas politicas que tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
+            Es necesario que el campo ID y los campos a modificar contengan datos válidos. Para modificar politicas deberá crear nuevas politicas que, si estan asignadas a productos tendran vigencia hasta las 00:00 AM (GMT-3).""", responses = {
             @ApiResponse(responseCode = "200", description = "Peticion correcta.",
                     content = @Content(schema = @Schema(implementation = Politic.class))),
             @ApiResponse(responseCode = "400", description = "No se pudo completar la operacion.",
@@ -131,7 +131,7 @@ public class PoliticController {
         return politicService.parcialMod(politicDTO);
     }
 
-    @Operation(summary = "Utilice este endpoint para borrar una politica de producto", description = "Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 86.", responses = {
+    @Operation(summary = "Utilice este endpoint para borrar una politica de producto", description = "Tenga en cuenta que necesita tener un usuario con rol ADMIN. NO podra modificar las politicas de muestra, en este caso los IDs menores a 87.", responses = {
             @ApiResponse(responseCode = "200", description = "La politica se borro exitosamente"),
             @ApiResponse(responseCode = "400", description = "La politica no se pudo eliminar correctamente.",
                     content = @Content(schema = @Schema(implementation = String.class), examples = {
