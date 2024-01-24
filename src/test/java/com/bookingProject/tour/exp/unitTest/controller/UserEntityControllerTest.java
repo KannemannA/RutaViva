@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,7 +74,7 @@ class UserEntityControllerTest {
         LoginUser login= new LoginUser(user1.getEmail(),user1.getPassword());
         String loginUser= mapper.writeValueAsString(login);
         doReturn(new ResponseEntity<>("token",HttpStatus.OK)).when(service).login(any(LoginUser.class));
-        mvc.perform(post("/api/user/public/login")
+        mvc.perform(post("/user/public/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginUser)).andDo(print())
                 .andExpect(status().isOk());
@@ -86,7 +85,7 @@ class UserEntityControllerTest {
     void register_user_successful_test() throws Exception {
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        mvc.perform(post("/api/user/public/guardar")
+        mvc.perform(post("/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isCreated());
@@ -99,7 +98,7 @@ class UserEntityControllerTest {
         //saveUser.setEmail("a@a.ct"); esto pasa la validacion.
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        MvcResult result=mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -113,7 +112,7 @@ class UserEntityControllerTest {
         saveUser.setName("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        MvcResult result=mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -127,7 +126,7 @@ class UserEntityControllerTest {
         saveUser.setLastName("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        MvcResult result=mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -141,7 +140,7 @@ class UserEntityControllerTest {
         saveUser.setPassword("aer");
         String body = mapper.writeValueAsString(saveUser);
         doReturn(new ResponseEntity<>(user1, HttpStatus.CREATED)).when(service).registrarUsuario(any(SaveUser.class));
-        MvcResult result=mvc.perform(post("/api/user/public/guardar")
+        MvcResult result=mvc.perform(post("/user/public/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -156,7 +155,7 @@ class UserEntityControllerTest {
         userEntityDTO.setId(1L);
         String body = mapper.writeValueAsString(userEntityDTO);
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
-        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
+        MvcResult result=mvc.perform(put("/user/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -170,7 +169,7 @@ class UserEntityControllerTest {
     void modify_user_successful_test() throws Exception {
         String body = mapper.writeValueAsString(userEntityDTO);
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).modificarUsuario(any(UserEntityDTO.class));
-        MvcResult result=mvc.perform(put("/api/user/admin/modificar")
+        MvcResult result=mvc.perform(put("/user/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isOk())
@@ -190,7 +189,7 @@ class UserEntityControllerTest {
     void partial_modify_user_successful_test()  throws Exception{
         String body = mapper.writeValueAsString(userEntityDTO);
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).patchMod(any(UserEntityDTO.class));
-        MvcResult result=mvc.perform(patch("/api/user/admin/parcialMod")
+        MvcResult result=mvc.perform(patch("/user/admin/parcialMod")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isOk())
@@ -209,7 +208,7 @@ class UserEntityControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void get_all_user_successful_test() throws Exception {
         doReturn(new ArrayList<>(Collections.singletonList(user1))).when(service).traerTodo();
-        MvcResult result=mvc.perform(get("/api/user/admin/traerTodo")).andDo(print())
+        MvcResult result=mvc.perform(get("/user/admin/traerTodo")).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         ArrayList list=mapper.readValue(result.getResponse().getContentAsString(),ArrayList.class);
@@ -221,7 +220,7 @@ class UserEntityControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void get_details_user_successful_test() throws Exception {
         doReturn(new ResponseEntity<>(user1, HttpStatus.OK)).when(service).traerId(anyLong());
-        MvcResult result=mvc.perform(get("/api/user/admin/detalle/1")).andDo(print())
+        MvcResult result=mvc.perform(get("/user/admin/detalle/1")).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         UserEntityDTO body= mapper.readValue(result.getResponse().getContentAsString(),UserEntityDTO.class);
@@ -238,7 +237,7 @@ class UserEntityControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void delete_user_successful_test() throws Exception {
         doReturn(new ResponseEntity<>(HttpStatus.OK)).when(service).borrarUsuario(anyLong());
-        mvc.perform(delete("/api/user/admin/eliminar/2"))
+        mvc.perform(delete("/user/admin/eliminar/2"))
                 .andExpect(status().isOk());
         verify(service,times(1)).borrarUsuario(anyLong());
     }

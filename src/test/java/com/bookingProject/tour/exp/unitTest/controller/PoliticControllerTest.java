@@ -25,7 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -71,7 +70,7 @@ class PoliticControllerTest {
     void save_politic_successful_test() throws Exception {
         String body=mapper.writeValueAsString(savePolitic);
         doReturn(new ResponseEntity<>(politic, HttpStatus.CREATED)).when(service).crearPolitica(any(SavePolitic.class));
-        MvcResult result=mvc.perform(post("/api/politic/admin/guardar")
+        MvcResult result=mvc.perform(post("/politic/admin/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isCreated())
@@ -89,7 +88,7 @@ class PoliticControllerTest {
         savePolitic.setTitle("ojo");
         String body=mapper.writeValueAsString(savePolitic);
         doReturn(new ResponseEntity<>(politic, HttpStatus.CREATED)).when(service).crearPolitica(any(SavePolitic.class));
-        MvcResult result=mvc.perform(post("/api/politic/admin/guardar")
+        MvcResult result=mvc.perform(post("/politic/admin/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -104,7 +103,7 @@ class PoliticControllerTest {
         savePolitic.setDescription("manantialdeoro");
         String body=mapper.writeValueAsString(savePolitic);
         doReturn(new ResponseEntity<>(politic, HttpStatus.CREATED)).when(service).crearPolitica(any(SavePolitic.class));
-        MvcResult result=mvc.perform(post("/api/politic/admin/guardar")
+        MvcResult result=mvc.perform(post("/politic/admin/guardar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -119,7 +118,7 @@ class PoliticControllerTest {
         politicDTO.setId(1L);
         String body=mapper.writeValueAsString(politicDTO);
         doReturn(new ResponseEntity<>(politic, HttpStatus.OK)).when(service).modificarPolitica(any(PoliticDTO.class));
-        MvcResult result=mvc.perform(put("/api/politic/admin/modificar")
+        MvcResult result=mvc.perform(put("/politic/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isBadRequest())
@@ -133,7 +132,7 @@ class PoliticControllerTest {
     void modify_politic_successful_test() throws Exception {
         String body=mapper.writeValueAsString(politicDTO);
         doReturn(new ResponseEntity<>(politic,HttpStatus.OK)).when(service).modificarPolitica(any(PoliticDTO.class));
-        MvcResult result=mvc.perform(put("/api/politic/admin/modificar")
+        MvcResult result=mvc.perform(put("/politic/admin/modificar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isOk())
@@ -150,7 +149,7 @@ class PoliticControllerTest {
     void partial_modify_politic_successful_test() throws Exception {
         String body=mapper.writeValueAsString(politicDTO);
         doReturn(new ResponseEntity<>(politic,HttpStatus.OK)).when(service).parcialMod(any(PoliticDTO.class));
-        MvcResult result=mvc.perform(patch("/api/politic/admin/parcialMod")
+        MvcResult result=mvc.perform(patch("/politic/admin/parcialMod")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)).andDo(print())
                 .andExpect(status().isOk())
@@ -165,7 +164,7 @@ class PoliticControllerTest {
     @Test
     void get_all_politic_successful_test() throws Exception {
         doReturn(new ArrayList<>(Collections.singletonList(politic))).when(service).traerPolitica();
-        MvcResult result=mvc.perform(get("/api/politic/public/traerTodo")).andDo(print())
+        MvcResult result=mvc.perform(get("/politic/public/traerTodo")).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         ArrayList bodyResult= mapper.readValue(result.getResponse().getContentAsString(),ArrayList.class);
@@ -176,7 +175,7 @@ class PoliticControllerTest {
     @Test
     void get_details_politic_successful_test() throws Exception {
         doReturn(new ResponseEntity<>(politic, HttpStatus.OK)).when(service).traerId(anyLong());
-        MvcResult result=mvc.perform(get("/api/politic/public/detalle/1")).andDo(print())
+        MvcResult result=mvc.perform(get("/politic/public/detalle/1")).andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         Politic bodyResult= mapper.readValue(result.getResponse().getContentAsString(),Politic.class);
@@ -190,7 +189,7 @@ class PoliticControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void delete_politic_successful_test() throws Exception {
         doReturn(new ResponseEntity<>(HttpStatus.OK)).when(service).eliminarPolitica(anyLong());
-        mvc.perform(delete("/api/politic/admin/eliminar/88")).andDo(print())
+        mvc.perform(delete("/politic/admin/eliminar/88")).andDo(print())
                 .andExpect(status().isOk());
         verify(service, times(1)).eliminarPolitica(anyLong());
     }
