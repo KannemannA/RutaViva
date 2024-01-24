@@ -28,4 +28,4 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Execute Jar File
-      run: sudo kill `sudo lsof -t -i:9090` & sudo java -jar /home/ubuntu/actions-runner/cicd/ServidorImagenes/ServidorImagenes/target/tour-exp-0.1.4-SNAPSHOT.jar > error.log 2>&1 &
+      run: sudo kill `sudo lsof -t -i:9090` & sudo java -jar /home/ubuntu/p2/RutaViva/RutaViva/RutaViva/targettour-exp-0.1.4-SNAPSHOT.jar > error.log 2>&1 &
