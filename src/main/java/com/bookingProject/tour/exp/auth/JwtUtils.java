@@ -28,9 +28,11 @@ public class JwtUtils {
     @Value("${spring.time.expiration}")
     private String timeExpiration;
 
-    @Value("classpath:jwtKeys/private_key.pem")
+    @Value("/etc/secrets/private_key.pem")
+    //@Value("classpath:jwtKeys/private_key.pem")
     private Resource privateKeyResource;
-    @Value("classpath:jwtKeys/public_key.pem")
+    @Value("/etc/secrets/public_key.pem")
+    //@Value("classpath:jwtKeys/public_key.pem")
     private Resource publicKeyResource;
 
     private PrivateKey loadPrivateKey(Resource resource) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
