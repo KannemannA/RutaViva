@@ -28,10 +28,10 @@ public class JwtUtils {
     @Value("${spring.time.expiration}")
     private String timeExpiration;
 
-    @Value("/jwtKeys/private_key.pem")
+    @Value("/private_key.pem")
     //@Value("classpath:jwtKeys/private_key.pem")
     private Resource privateKeyResource;
-    @Value("/jwtKeys/public_key.pem")
+    @Value("/public_key.pem")
     //@Value("classpath:jwtKeys/public_key.pem")
     private Resource publicKeyResource;
 
