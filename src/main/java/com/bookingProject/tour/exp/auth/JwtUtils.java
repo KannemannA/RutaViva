@@ -28,11 +28,28 @@ public class JwtUtils {
     @Value("${spring.time.expiration}")
     private String timeExpiration;
 
-    @Value("/etc/secrets/privateKey.pem")
-    //@Value("classpath:jwtKeys/private_key.pem")
+    @Value("${custom.private.key}")
+    private String privateKeyContent;
+
+    @Value("${custom.public.key}")
+    private String publicKeyContent;
+
+    private PublicKey loadPublicKeyRender(String content) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] decodeKey= Base64.getDecoder().decode(content);
+        KeyFactory keyFactory= KeyFactory.getInstance("RSA");
+        return keyFactory.generatePublic(new X509EncodedKeySpec(decodeKey));
+    }
+
+    private PrivateKey loadPrivateKeyRender(String content) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] decodeKey= Base64.getDecoder().decode(content);
+        KeyFactory keyFactory= KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeKey));
+    }
+
+    /*@Value("classpath:jwtKeys/private_key.pem")
     private Resource privateKeyResource;
-    @Value("/etc/secrets/publicKey.pem")
-    //@Value("classpath:jwtKeys/public_key.pem")
+
+    @Value("classpath:jwtKeys/public_key.pem")
     private Resource publicKeyResource;
 
     private PrivateKey loadPrivateKey(Resource resource) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -55,11 +72,11 @@ public class JwtUtils {
         byte[] decodeKey= Base64.getDecoder().decode(publicKeyPem);
         KeyFactory keyFactory= KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(new X509EncodedKeySpec(decodeKey));
-    }
+    }*/
 
     //generar token de acceso
     public String generarTokenkey(UserDetails userDetails) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, JOSEException {
-        PrivateKey privateKey= loadPrivateKey(privateKeyResource);
+        PrivateKey privateKey= loadPrivateKeyRender(privateKeyContent);
         JWSSigner signer= new RSASSASigner(privateKey);
         JWTClaimsSet claimsSet= new JWTClaimsSet.Builder()
                 .subject(userDetails.getUsername())
@@ -73,7 +90,7 @@ public class JwtUtils {
 
     //validar el token de acceso
     public JWTClaimsSet parseJWT(String token) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ParseException, JOSEException {
-        PublicKey publicKey= loadPublicKey(publicKeyResource);
+        PublicKey publicKey= loadPublicKeyRender(publicKeyContent);
         SignedJWT signedJWT= SignedJWT.parse(token);
         JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
         if (!signedJWT.verify(verifier)){
