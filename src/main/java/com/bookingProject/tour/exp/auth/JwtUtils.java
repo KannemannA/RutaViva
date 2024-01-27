@@ -28,19 +28,19 @@ public class JwtUtils {
     @Value("${spring.time.expiration}")
     private String timeExpiration;
 
-    @Value("${PRIVATE_KEY_PATH}")
+    @Value("file:${privateKey.pem}")
     //@Value("classpath:jwtKeys/private_key.pem")
     private Resource privateKeyResource;
-    @Value("${PUBLIC_KEY_PATH}")
+    @Value("file:${publicKey.pem}")
     //@Value("classpath:jwtKeys/public_key.pem")
     private Resource publicKeyResource;
 
     private PrivateKey loadPrivateKey(Resource resource) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes= Files.readAllBytes(Paths.get(resource.getURI()));
         String privateKeyPem = new String(keyBytes, StandardCharsets.UTF_8)
-                .replace("-----BEGIN PRIVATE KEY-----","")
-                .replace("-----END PRIVATE KEY-----","")
-                .replaceAll("\\s","");
+                    .replace("-----BEGIN PRIVATE KEY-----","")
+                    .replace("-----END PRIVATE KEY-----","")
+                    .replaceAll("\\s","");
         byte[] decodeKey= Base64.getDecoder().decode(privateKeyPem);
         KeyFactory keyFactory= KeyFactory.getInstance("RSA");
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decodeKey));
